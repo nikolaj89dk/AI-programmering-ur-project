@@ -1,0 +1,104 @@
+import pygame
+import math
+import time 
+import random
+pygame.init() # Initialize Pygame
+screen = pygame.display.set_mode((640, 640)) # Create a window of 640x480 pixels
+
+run_flag = True
+while run_flag is True:
+
+    #sun and moon
+    rn=time.gmtime()
+    if rn.tm_hour >= 4 and rn.tm_hour < 16: #gmt er 2 timer bagefter så vi skal have 4 og 16 for at få det til at passe med danmarks kl 6 og 18
+        screen.fill((135, 206, 235)) # Fill the screen with blue
+        pygame.draw.circle(screen, (252, 229, 112), (320, 200), 50) # Draw the sun
+        #draw clouds that are randomly placed on the screen
+        for i in range(5):
+            x = random.randint(0, 640)
+            y = random.randint(0, 640)
+            pygame.draw.circle(screen, (255, 255, 255), (x, y), 20)
+            pygame.draw.circle(screen, (255, 255, 255), (x + 20, y + 10), 20)
+            pygame.draw.circle(screen, (255, 255, 255), (x - 20, y + 10), 20)
+    else:
+        screen.fill((0, 10, 90)) # Fill the screen with black
+        pygame.draw.circle(screen, (247, 234, 198), (320, 210), 35) # Draw the moon
+        #draw stars that are randomly placed on the screen
+        for i in range(100):
+            x = random.randint(0, 640)
+            y = random.randint(0, 640)
+            pygame.draw.circle(screen, (255, 255, 255), (x, y), 1)
+            #white outline around the clock face 
+            pygame.draw.circle(screen, (255, 255, 255), (320, 320), 201, 4)
+            #white outline around the clock hands
+            pygame.draw.line(screen, (255, 255, 255), (320, 320), (320 + 166 * math.cos(math.radians(rn.tm_sec * 6 - 90)), 320 + 166 * math.sin(math.radians(rn.tm_sec * 6 - 90))), 4)
+            pygame.draw.line(screen, (255, 255, 255), (320, 320), (320 + 151 * math.cos(math.radians(rn.tm_min * 6 - 90)), 320 + 151 * math.sin(math.radians(rn.tm_min * 6 - 90))), 6)
+            pygame.draw.line(screen, (255, 255, 255), (320, 320), (320 + 101 * math.cos(math.radians((rn.tm_hour+2) * 30 - 90)), 320 + 101 * math.sin(math.radians((rn.tm_hour+2) * 30 - 90))), 8)
+           
+    time.sleep(1)
+
+    #draw the clock face
+    pygame.draw.circle(screen, (0, 0, 0), (320, 320), 200, 2)
+
+    #middle dot
+    pygame.draw.circle(screen, (0, 0, 0), (320, 320), 7)
+
+    #draw the numbers on the clock face
+    font = pygame.font.Font(None, 36)
+    for i in range(1, 13):
+        angle = math.radians(i * 30 - 90)
+        x = 320 + 160 * math.cos(angle)
+        y = 320 + 160 * math.sin(angle)
+        text = font.render(str(i), True, (0, 0, 0))
+        text_rect = text.get_rect(center=(x, y))
+        screen.blit(text, text_rect)
+
+    #draw the tick marks on the clock face
+    for i in range(60):
+        angle = math.radians(i * 6 - 90)
+        x1 = 320 + 180 * math.cos(angle)
+        y1 = 320 + 180 * math.sin(angle)
+        x1_t = 320 + 180 * math.cos(angle)
+        y1_t = 320 + 180 * math.sin(angle)
+        if i % 5 == 0:
+            x2 = 320 + 200 * math.cos(angle)
+            y2 = 320 + 200 * math.sin(angle)
+            pygame.draw.line(screen, (0, 0, 0), (x1_t, y1_t), (x2, y2), 4)
+        else:
+            x2 = 320 + 200 * math.cos(angle)
+            y2 = 320 + 200 * math.sin(angle)
+            pygame.draw.line(screen, (0, 0, 0), (x1, y1), (x2, y2), 2)
+
+    #get the current time
+    timer=rn.tm_hour+2
+    minute=rn.tm_min
+    second=rn.tm_sec
+
+    x_start = 320
+    y_start = 320
+    degree_sec = second * 6 -90
+    degree_min = minute * 6 -90
+    degree_hour = timer * 30 -90
+
+    #sec viser 
+    x_end_sec = x_start + 165 * math.cos(math.radians(degree_sec))
+    y_end_sec = y_start + 165 * math.sin(math.radians(degree_sec))
+    pygame.draw.line(screen, (0, 0, 0), (x_start, y_start), (x_end_sec, y_end_sec), 2)
+    #smooth movement of the second hand
+    degree_sec += 6 * (1/60)
+
+    #min viser 
+    x_end_min = x_start + 150 * math.cos(math.radians(degree_min))
+    y_end_min = y_start + 150 * math.sin(math.radians(degree_min))
+    pygame.draw.line(screen, (0, 0, 0), (x_start, y_start), (x_end_min, y_end_min), 4)
+
+    #time viser
+    x_end_hour = x_start + 100 * math.cos(math.radians(degree_hour))
+    y_end_hour = y_start + 100 * math.sin(math.radians(degree_hour))
+    pygame.draw.line(screen, (0, 0, 0), (x_start, y_start), (x_end_hour, y_end_hour), 6)
+
+    for event in pygame.event.get():
+
+        if event.type == pygame.QUIT:
+            run_flag = False
+    pygame.display.flip() # Refresh the screen so drawing appears
